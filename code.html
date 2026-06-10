@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>changed virus在线word版</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<style>
+		/* 加载动画显示 */
+		.loader-container {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			display: flex;
+			justify-content: center;
+			flex-direction: column;
+			align-items: center;
+			z-index: 9999;
+			transition: opacity 0.8s ease, visibility 0.8s ease;
+			overflow: hidden;
+		}
+
+		/* 背景图片图层（用于附加高斯模糊和动态缩放） */
+			.loader-background {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-image: url("https://lingveefurry.github.io/changed-virus/icons/background.png")
+			background-size: cover;
+			background-position: center;
+			background-repeat: no-repeat;
+			filter: blur(0px); /* 刚开始清晰 */
+			animation: blurbackground 0.5s ease-out forwards; /* 0.5s后开始变模糊 */
+			animation-delay: 0s; /* 立即开始 */
+			z-index: -1;
+		}
+	
+		/* 背景模糊动画（模拟Windows开机效果） */
+		@keyframes blurbackground {
+			0% {
+				filter: blur(0px);
+				transform: scale(1.10); /* 轻微放大增强效果 */
+			}
+			100% {
+				filter: blur(15px); /* 最终模糊程度 */
+				transform: scale(1);
+			}
+		}
+	
+		/* 添加半透明遮罩层（以提升文字可读性） */
+		.loader-overlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.2);
+			z-index: 0;
+		}
+	
+		.loader-container.hidden {
+			opacity: 0;
+			visibility: hidden;
+		}
+	
+		/* 中间圆角带阴影的白色加载框 */
+		.loader-content {
+			background-color: #f8fafc; /* 具体颜色（16进制rgb色彩） */
+			padding: 40px 60px;
+			border-radius: 16px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+				z-index: 1;
+			opacity: 0;
+			transform: translateY(10px);
+			animation: fadeInContent 0.6s ease-out forwards;
+			animation-delay: 0.3s; /* 背景开始模糊再显示内容（高斯模糊） */
+		}
+	
+		/* 内容淡入动画 */
+		@keyframes fadeInContent {
+			0% {
+				opacity: 0;
+				transform: translateY(10px);
+			}
+			100% {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+	
+		.loader {
+			width: 60px;
+			height: 60px;
+			border: 5px solid #e2e8f0;
+			border-top: 5px solid #2b579a; /* Word蓝色主题字 */
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+			margin-bottom: 20px;
+		}
+	
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+	
+		/* 文档容器样式 */
+		.document-container {
+			width: 100%;
+			height: 100vh;
+			opacity: 0;
+			transform: translateY(20px);
+			transition: opacity 0.8s ease, transform 0.8s ease;
+		}
+	
+		.document-container.visible {
+			opacity:1;
+			transform: translateY(0);
+		}
+	
+		/* Office iframe样式 */
+		.office-iframe {
+			width: 100%;
+			height: 100%;
+			border: none;
+			box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+		}
+	</style>
+</head>
+<body class="m-0 p-0 overflow-hidden bg-gray-100">
+	<!-- 加载动画界面 -->
+	<div id="loader" class="loader-container">
+		<!-- 背景图片图层 -->
+		<div class="loader-background">
+		</div>
+		<!-- 半透明遮罩层 -->
+		<div class="loader-overlay">
+		</div>
+		<!-- 中间加载框的内容 -->
+		<div class="loader-content">
+			<div class="loader">
+			</div>
+			<h2 class="text-xl font-semiblod text-gray-700 mb-2">
+			正在加载文档...
+			</h2>
+			<p class="text-gray-500">
+			嗷呜！请稍后，精彩小说马上展示~...
+			</p>
+		</div>
+	</div>
+	
+	<!-- 文档显示容器 -->
+	<div id="document" class="document-container">
+		<iframe 
+			id="officeFrame"
+			class="office-iframe"
+			src=""
+			allowfullscreen
+			title="changed-virus Word版"
+		>
+		</iframe>
+	</div>
+	
+	<script>
+		const DOCUMENT_URL = "https://lingveefurry.github.io/changed-virus/doc/changed-virus.docx";
+		
+		// 搭建Office online viewer URL
+		const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src${encodeURIComponent(DOCUMENT_URL)}`;
+		
+		// 获取DOM元素
+		const loader = document.getElementById('loader');
+		const documentContainer = document.getElementById('document');
+		const officeFrame = document.getElementById('officeFrame');
+		
+		// 设置iframe源
+		officeFrame.src = officeViewerUrl;
+		
+		// 监听iframe加载完成事件
+		officeFrame.onload = function() {
+			// 给予一点延迟让iframe内部内容完全加载和渲染
+			setTimeout(() => {
+				// 隐藏加载动画
+				loader.classList.add('hidden');
+				// 显示文档容器实现丝滑过度
+				documentContainer.classList.add('visible');
+				
+				// 自动滚动到文档顶部
+				window.scrollTo( {
+					top: 0,
+					behavior: 'smooth'
+				} );
+					
+				console.log('内容已加载完毕！');
+			}, 500);
+		};
+		
+		// 兜底补丁：处理加载错误以防bug不明
+		officeFrame.onerror = function() {
+			document.querySelector('.loader-content').innerHTML = `
+				<div class = "text-center">
+					<div class = "text-red-500 text-6xl mb-4">❌️
+					</div>
+					<h2 class = "text-2xl font-bold text-gray-700 mb-4">
+					小说内容加载失败
+					</h2>
+					<p class = "text-gray-500 mb-6">
+					可能的原因（请依次排查后刷新页面重试）：
+					</p>
+					<ul class = "text-gray-500 text-left max-w-md mx-auto list-disc pl-5">
+						<li>
+						I. 文档URL设置不正确或无法访问
+						</li>
+						<li>
+						II. 此设备没有权限访问服务器内文档
+						</li>
+						<li>
+						III. 文档格式不正确/不支持或已损坏
+						</li>
+						<li>
+						IV. 网络连接存在问题或无法访问服务器/服务器状态异常或正在维护
+						</li>
+					</ul>
+					<button
+						onclick = "location.reload()"
+						class = "mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+					>
+					点击重新加载
+					</button>
+				</div>
+			`;
+		};
+		
+		//超时处理（15s）
+		setTimeout(() => {
+			if(!documentContainer.classList.contains('visible')) {
+				officeFrame.onerror();
+			}
+		}, 15000);
+	</script>
+</body>
+</html>
